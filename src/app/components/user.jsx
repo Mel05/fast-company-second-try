@@ -14,6 +14,7 @@ const User = ({
 	handleDelete,
 	handleToggleBookMark,
 }) => {
+	console.log(_id)
 	return (
 		<tr>
 			<td> {name} </td>
