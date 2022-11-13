@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react'
-// import PropTypes from 'prop-types'
 import api from '../../../api'
 import _ from 'lodash'
 import { paginate } from '../../../utils/paginate'
-//import Table from '../../common/table/index.js'
 import SearchStatus from '../../ui/searchStatus'
 import GroupList from '../../common/groupList'
 import Pagination from '../../common/pagination'
@@ -54,6 +52,7 @@ const UsersListPage = () => {
 	const handleDelete = id => {
 		setUsers(users.filter(user => user._id !== id))
 	}
+
 	const handleToggleBookMark = id => {
 		setUsers(
 			users.map(user => {
@@ -86,6 +85,10 @@ const UsersListPage = () => {
 		const totalNumUsers = filteredUsers.length
 		const sortUsers = _.orderBy(filteredUsers, [sortBy.path], [sortBy.order])
 		const newUsers = paginate(sortUsers, currentPage, usersOnPage)
+
+		if (newUsers.length === 0 && totalNumUsers !== 0) {
+			setCurrentPage(currentPage - 1)
+		}
 
 		return (
 			<>
