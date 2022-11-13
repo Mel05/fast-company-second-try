@@ -9,6 +9,7 @@ const SelectField = ({
 	options,
 	error,
 	handleChange,
+	handleKeyDown,
 }) => {
 	const optionsArray =
 		!Array.isArray(options) && typeof options === 'object'
@@ -37,6 +38,7 @@ const SelectField = ({
 				name={name}
 				value={value}
 				onChange={onHandleChange}
+				onKeyDown={handleKeyDown}
 			>
 				<option disabled value=''>
 					{defaultOptions}
@@ -60,7 +62,8 @@ SelectField.propTypes = {
 	name: PropTypes.string,
 	error: PropTypes.string,
 	handleChange: PropTypes.func,
+	handleKeyDown: PropTypes.func,
 	options: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 }
 
-export default SelectField
+export default React.memo(SelectField)

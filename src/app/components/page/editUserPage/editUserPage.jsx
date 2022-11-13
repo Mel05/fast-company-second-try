@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import api from '../../../api'
 import * as yup from 'yup'
-import TextField from '../../common/form/textField'
-import SelectField from '../../common/form/selectField'
-import RadioField from '../../common/form/radioField'
-import MultiSelectField from '../../common/form/multiSelectField'
+import FormComponent, {
+	TextField,
+	SelectField,
+	RadioField,
+	MultiSelectField,
+} from '../../common/form'
+
 import BackButton from '../../common/backButton'
 
 const EditUserPage = () => {
@@ -22,7 +25,6 @@ const EditUserPage = () => {
 	})
 	const [professions, setProfessions] = useState([])
 	const [qualities, setQualities] = useState({})
-	const [errors, setErrors] = useState({})
 
 	const getProfessionsById = id => {
 		for (const prof in professions) {
@@ -43,10 +45,7 @@ const EditUserPage = () => {
 		return qualitiesArray
 	}
 
-	const handleSubmit = e => {
-		e.preventDefault()
-		const isValid = validate()
-		if (!isValid) return
+	const handleSubmit = data => {
 		const { profession, qualities } = data
 		api.users
 			.update(userId, {
@@ -55,7 +54,6 @@ const EditUserPage = () => {
 				qualities: getQualities(qualities),
 			})
 			.then(data => navigate(`/users/${data._id}`))
-		console.log(data)
 	}
 
 	const transformData = data => {
@@ -91,56 +89,26 @@ const EditUserPage = () => {
 		name: yup.string().required('Введите ваше имя'),
 	})
 
-	useEffect(() => {
-		validate()
-	}, [data])
-
-	const handleChange = target => {
-		setData(prevState => ({
-			...prevState,
-			[target.name]: target.value,
-		}))
-	}
-
-	const validate = () => {
-		validateScheme
-			.validate(data)
-			.then(() => setErrors({}))
-			.catch(err => setErrors({ [err.path]: err.message }))
-		return Object.keys(errors).length === 0
-	}
-	const isValid = Object.keys(errors).length === 0
-
 	return (
 		<div className='container mt-5'>
 			<BackButton />
 			<div className='row'>
 				<div className='col-md-6 offset-md-3 shadow p-4'>
 					{!isLoading && Object.keys(professions).length > 0 ? (
-						<form onSubmit={handleSubmit}>
-							<TextField
-								label='Имя'
-								name='name'
-								value={data.name}
-								error={errors.name}
-								handleChange={handleChange}
-							/>
-							<TextField
-								label='Электронная почта'
-								name='email'
-								value={data.email}
-								error={errors.email}
-								handleChange={handleChange}
-							/>
+						<FormComponent
+							handleSubmit={handleSubmit}
+							validateScheme={validateScheme}
+							defaultData={data}
+						>
+							<TextField label='Имя' name='name' autoFocus />
+							<TextField label='Электронная почта' name='email' />
 							<SelectField
 								label='Выберите свою профессию'
 								defaultOptions='Выберите...'
 								name='profession'
-								value={data.profession}
 								options={professions}
-								error={errors.profession}
-								handleChange={handleChange}
 							/>
+
 							<RadioField
 								label='Выберите ваш пол'
 								options={[
@@ -148,26 +116,22 @@ const EditUserPage = () => {
 									{ name: 'Female', value: 'female' },
 									{ name: 'Other', value: 'other' },
 								]}
-								value={data.sex}
 								name='sex'
-								handleChange={handleChange}
 							/>
 							<MultiSelectField
 								label='Выберите ваши качества'
 								name='qualities'
-								values
 								defaultValue={data.qualities}
 								options={qualities}
-								handleChange={handleChange}
 							/>
+
 							<button
 								type='submit'
 								className='btn btn-primary w-100 mx-auto mb-4'
-								disabled={!isValid}
 							>
 								Обновить
 							</button>
-						</form>
+						</FormComponent>
 					) : (
 						'Loading...'
 					)}

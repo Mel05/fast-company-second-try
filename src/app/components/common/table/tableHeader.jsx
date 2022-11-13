@@ -16,9 +16,9 @@ const TableHeader = ({ selectedSort, onSort, columns }) => {
 	const renderSortArrow = (selectedSort, currentPath) => {
 		if (selectedSort.path === currentPath) {
 			if (selectedSort.order === 'asc') {
-				return <i className='bi bi-caret-down-fill'>__DOWN</i>
+				return <span className='badge bg-primary m-1'> &dArr; </span>
 			} else {
-				return <i className='bi bi-caret-up-fill'> __UP </i>
+				return <span className='badge bg-secondary m-1'> &uArr; </span>
 			}
 		}
 		return null

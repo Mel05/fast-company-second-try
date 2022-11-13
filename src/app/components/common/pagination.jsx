@@ -16,14 +16,15 @@ const Pagination = ({
 		<nav aria-label='Page navigation example'>
 			<ul className='pagination'>
 				<li className='page-item'>
-					<a className='page-link' aria-label='Previous'>
-						<span
-							aria-hidden='true'
-							onClick={() => handlePageChange(currentPage - 1)}
-						>
-							&laquo;
-						</span>
-					</a>
+					<button
+						hidden={currentPage === 1}
+						className='page-link'
+						aria-label='Previous'
+						aria-hidden='true'
+						onClick={() => handlePageChange(currentPage - 1)}
+					>
+						&laquo;
+					</button>
 				</li>
 				{pages.map(page => (
 					<li
@@ -31,6 +32,7 @@ const Pagination = ({
 						className={'page-item ' + (page === currentPage ? 'active' : '')}
 					>
 						<span
+							role={'button'}
 							className={'page-link'}
 							onClick={() => handlePageChange(page)}
 						>
@@ -40,14 +42,15 @@ const Pagination = ({
 				))}
 
 				<li className='page-item'>
-					<a className='page-link' aria-label='Next'>
-						<span
-							aria-hidden='true'
-							onClick={() => handlePageChange(currentPage + 1)}
-						>
-							&raquo;
-						</span>
-					</a>
+					<button
+						hidden={numOfPages <= currentPage}
+						className='page-link'
+						aria-label='Next'
+						aria-hidden='true'
+						onClick={() => handlePageChange(currentPage + 1)}
+					>
+						&raquo;
+					</button>
 				</li>
 			</ul>
 		</nav>

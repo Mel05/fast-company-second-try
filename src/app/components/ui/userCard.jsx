@@ -35,14 +35,12 @@ const UserCard = ({ user }) => {
 						<h4> {user.name} </h4>
 						<p className='text-secondary mb-1'> {user.profession.name}</p>
 						<div className='text-muted'>
-							<i className='bi bi-caret-down-fill text-primary' role='button'>
-								{' '}
-								down{' '}
-							</i>
-							<i className='bi bi-caret-up text-secondary' role='button'>
-								{' '}
-								up{' '}
-							</i>
+							<span className='badge bg-primary' role='button'>
+								&dArr;
+							</span>{' '}
+							<span className='badge bg-secondary' role='button'>
+								&uArr;
+							</span>
 							<span className='ms-2'> {user.rate} </span>
 						</div>
 					</div>
