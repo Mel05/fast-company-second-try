@@ -46,4 +46,4 @@ MultiSelectField.propTypes = {
 	options: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 }
 
-export default MultiSelectField
+export default React.memo(MultiSelectField)

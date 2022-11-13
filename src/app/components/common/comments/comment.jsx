@@ -51,7 +51,10 @@ const Comment = ({
 											className='btn btn-sm text-primary d-flex align-items-center'
 											onClick={() => handleRemoveComment(id)}
 										>
-											<i className='bi bi-x-lg'> PiU </i>
+											<span className='badge bg-primary' role='button'>
+												{' '}
+												X{' '}
+											</span>
 										</button>
 									</div>
 									<p className='small mb-0'> {content} </p>

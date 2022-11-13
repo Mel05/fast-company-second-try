@@ -55,18 +55,18 @@ const FormComponent = ({
 	const clonedElements = React.Children.map(children, child => {
 		const childType = typeof child.type
 		let config = {}
-		if (childType === 'function') {
-			if (!child.props.name) {
-				throw new Error('Name property is required for field components', child)
-			}
-			config = {
-				...child.props,
-				handleChange: handleChange,
-				value: data[child.props.name] || '',
-				error: errors[child.props.name],
-				handleKeyDown: handleKeyDown,
-			}
-		}
+		// if (childType === 'function') {
+		// 	if (!child.props.name) {
+		// 		throw new Error('Name property is required for field components', child)
+		// 	}
+		// 	config = {
+		// 		...child.props,
+		// 		handleChange: handleChange,
+		// 		value: data[child.props.name] || '',
+		// 		error: errors[child.props.name],
+		// 		handleKeyDown: handleKeyDown,
+		// 	}
+		// }
 
 		if (childType === 'object') {
 			if (!child.props.name) {
