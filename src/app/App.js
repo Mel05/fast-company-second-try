@@ -1,26 +1,48 @@
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
+import { ToastContainer } from 'react-toastify'
 
 import Main from './layouts/main'
 import Login from './layouts/login'
 import Users from './layouts/users'
 import NavBar from './components/ui/navBar'
+import { ProfessionsProvider } from './hooks/useProfessions'
+import { QualitiesProvider } from './hooks/useQualities'
+import AuthProvider from './hooks/useAuth'
+import LogOut from './layouts/logOut'
+import ProtectedRoute from './components/common/protectedRoute'
 
 function App() {
 	return (
 		<div>
-			<NavBar />
-			<Routes>
-				<Route path='/users/' element={<Users />} />
-				<Route path='/users/:userId' element={<Users />} />
-				<Route path='/users/:userId/:edit' element={<Users />} />
+			<AuthProvider>
+				<NavBar />
+				<QualitiesProvider>
+					<ProfessionsProvider>
+						<Routes>
+							<Route path='/' element={<Main />} />
+							<Route path='users/' element={<Users />} />
+							<Route path='users/:userId' element={<Users />} />
+							<Route
+								path='users/:userId/:edit'
+								element={
+									<ProtectedRoute>
+										<Users />
+									</ProtectedRoute>
+								}
+							/>
 
-				<Route path='/login/' element={<Login />} />
-				<Route path='/login/:type' element={<Login />} />
+							<Route path='login/' element={<Login />} />
+							<Route path='login/:type' element={<Login />} />
 
-				<Route path='/' element={<Main />} />
-				<Route path='*' element={<Main />} />
-			</Routes>
+							<Route path='logout/' element={<LogOut />} />
+
+							<Route path='*' element={<Main />} />
+						</Routes>
+					</ProfessionsProvider>
+				</QualitiesProvider>
+			</AuthProvider>
+			<ToastContainer />
 		</div>
 	)
 }

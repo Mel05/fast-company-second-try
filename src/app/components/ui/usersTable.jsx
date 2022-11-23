@@ -4,8 +4,9 @@ import { Link } from 'react-router-dom'
 import BookMark from '../common/bookmark'
 import Qualities from '../ui/qualities'
 import Table from '../common/table'
+import Profession from './profession'
 
-const UsersTable = ({ handleToggleBookMark, handleDelete, ...rest }) => {
+const UsersTable = ({ handleToggleBookMark, ...rest }) => {
 	const columns = {
 		name: {
 			path: 'name',
@@ -16,7 +17,10 @@ const UsersTable = ({ handleToggleBookMark, handleDelete, ...rest }) => {
 			name: 'Качества',
 			component: user => <Qualities qualities={user.qualities} />,
 		},
-		professions: { path: 'profession.name', name: 'Профессия' },
+		professions: {
+			name: 'Профессия',
+			component: user => <Profession id={user.profession} />,
+		},
 		completedMeetings: { path: 'completedMeetings', name: 'Встреч' },
 		rate: { path: 'rate', name: 'Оценка' },
 		bookmark: {
@@ -30,16 +34,6 @@ const UsersTable = ({ handleToggleBookMark, handleDelete, ...rest }) => {
 				/>
 			),
 		},
-		delete: {
-			component: user => (
-				<button
-					className={'btn btn-sm btn-danger'}
-					onClick={() => handleDelete(user._id)}
-				>
-					Удалить
-				</button>
-			),
-		},
 	}
 
 	return <Table columns={columns} {...rest} />
@@ -47,7 +41,6 @@ const UsersTable = ({ handleToggleBookMark, handleDelete, ...rest }) => {
 
 UsersTable.propTypes = {
 	handleToggleBookMark: PropTypes.func.isRequired,
-	handleDelete: PropTypes.func.isRequired,
 }
 
 export default UsersTable

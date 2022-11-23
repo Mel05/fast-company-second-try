@@ -32,6 +32,8 @@ const FormComponent = ({
 		e.preventDefault()
 		const isValid = validate()
 		if (!isValid) return
+		console.log(data)
+
 		handleSubmit(data)
 	}
 

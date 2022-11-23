@@ -1,81 +1,73 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import api from '../../../api'
+import { useNavigate } from 'react-router-dom'
 import * as yup from 'yup'
-import FormComponent, {
-	TextField,
-	SelectField,
-	RadioField,
-	MultiSelectField,
-} from '../../common/form'
-
+import TextField from '../../common/form/textField'
+import SelectField from '../../common/form/selectField'
+import RadioField from '../../common/form/radioField'
+import MultiSelectField from '../../common/form/multiSelectField'
 import BackButton from '../../common/backButton'
+import { useQualities } from '../../../hooks/useQualities'
+import { useProfessions } from '../../../hooks/useProfessions'
+import { useAuth } from '../../../hooks/useAuth'
 
 const EditUserPage = () => {
-	const { userId } = useParams()
 	const navigate = useNavigate()
-	const [isLoading, setIsLoading] = useState(false)
+	const [isLoading, setIsLoading] = useState(true)
+	const [data, setData] = useState()
+	const { currentUser, updateUserData } = useAuth()
+	const [errors, setErrors] = useState({})
+	const { professions, isLoading: profLoading } = useProfessions()
+	const { qualities, isLoading: qualLoading } = useQualities()
+	const professionsList = professions.map(p => ({
+		label: p.name,
+		value: p._id,
+	}))
+	const qualitiesList = qualities.map(q => ({ label: q.name, value: q._id }))
 
-	const [data, setData] = useState({
-		email: '',
-		password: '',
-		profession: '',
-		sex: 'male',
-		qualities: [],
-	})
-	const [professions, setProfessions] = useState([])
-	const [qualities, setQualities] = useState({})
-
-	const getProfessionsById = id => {
-		for (const prof in professions) {
-			const profData = professions[prof]
-			if (profData._id === id) return profData
-		}
+	const handleSubmit = async e => {
+		e.preventDefault()
+		const isValid = validate()
+		if (!isValid) return
+		await updateUserData({
+			...data,
+			qualities: data.qualities.map(q => q.value),
+		})
+		navigate(`/users/${currentUser._id}`)
 	}
 
-	const getQualities = elements => {
+	function getQualitiesListById(qualitiesIds) {
 		const qualitiesArray = []
-		for (const elem of elements) {
-			for (const qualy in qualities) {
-				if (elem.value === qualities[qualy]._id) {
-					qualitiesArray.push(qualities[qualy])
+		for (const qualId of qualitiesIds) {
+			for (const quality of qualities) {
+				if (quality._id === qualId) {
+					qualitiesArray.push(quality)
+					break
 				}
 			}
 		}
 		return qualitiesArray
 	}
 
-	const handleSubmit = data => {
-		const { profession, qualities } = data
-		api.users
-			.update(userId, {
-				...data,
-				profession: getProfessionsById(profession),
-				qualities: getQualities(qualities),
-			})
-			.then(data => navigate(`/users/${data._id}`))
-	}
-
 	const transformData = data => {
-		return data.map(qual => ({ label: qual.name, value: qual._id }))
+		return getQualitiesListById(data).map(qual => ({
+			label: qual.name,
+			value: qual._id,
+		}))
 	}
 
 	useEffect(() => {
-		setIsLoading(true)
-		api.users.getById(userId).then(({ profession, qualities, ...data }) =>
-			setData(prevState => ({
-				...prevState,
-				...data,
-				qualities: transformData(qualities),
-				profession: profession._id,
-			}))
-		)
-		api.qualities.fetchAll().then(data => setQualities(data))
-		api.professions.fetchAll().then(data => setProfessions(data))
-	}, [])
+		if (!profLoading && !qualLoading && currentUser && !data) {
+			setData({
+				...currentUser,
+				qualities: transformData(currentUser.qualities),
+			})
+		}
+	}, [profLoading, qualLoading, currentUser, data])
 
 	useEffect(() => {
-		if (data._id) setIsLoading(false)
+		if (data && isLoading) {
+			setIsLoading(false)
+		}
 	}, [data])
 
 	const validateScheme = yup.object().shape({
@@ -89,24 +81,57 @@ const EditUserPage = () => {
 		name: yup.string().required('Введите ваше имя'),
 	})
 
+	useEffect(() => {
+		validate()
+	}, [data])
+
+	const handleChange = target => {
+		setData(prevState => ({
+			...prevState,
+			[target.name]: target.value,
+		}))
+	}
+
+	const validate = () => {
+		validateScheme
+			.validate(data)
+			.then(() => setErrors({}))
+			.catch(err => setErrors({ [err.path]: err.message }))
+		return Object.keys(errors).length === 0
+	}
+
+	const isValid = Object.keys(errors).length === 0
+
 	return (
 		<div className='container mt-5'>
 			<BackButton />
 			<div className='row'>
 				<div className='col-md-6 offset-md-3 shadow p-4'>
 					{!isLoading && Object.keys(professions).length > 0 ? (
-						<FormComponent
-							handleSubmit={handleSubmit}
-							validateScheme={validateScheme}
-							defaultData={data}
-						>
-							<TextField label='Имя' name='name' autoFocus />
-							<TextField label='Электронная почта' name='email' />
+						<form onSubmit={handleSubmit}>
+							<TextField
+								label='Имя'
+								name='name'
+								value={data.name}
+								handleChange={handleChange}
+								error={errors.name}
+								autoFocus
+							/>
+							<TextField
+								label='Электронная почта'
+								name='email'
+								value={data.email}
+								handleChange={handleChange}
+								error={errors.email}
+							/>
 							<SelectField
 								label='Выберите свою профессию'
 								defaultOptions='Выберите...'
 								name='profession'
-								options={professions}
+								options={professionsList}
+								handleChange={handleChange}
+								value={data.profession}
+								error={errors.profession}
 							/>
 
 							<RadioField
@@ -117,21 +142,25 @@ const EditUserPage = () => {
 									{ name: 'Other', value: 'other' },
 								]}
 								name='sex'
+								value={data.sex}
+								handleChange={handleChange}
 							/>
 							<MultiSelectField
 								label='Выберите ваши качества'
 								name='qualities'
 								defaultValue={data.qualities}
-								options={qualities}
+								options={qualitiesList}
+								handleChange={handleChange}
 							/>
 
 							<button
 								type='submit'
+								disabled={!isValid}
 								className='btn btn-primary w-100 mx-auto mb-4'
 							>
 								Обновить
 							</button>
-						</FormComponent>
+						</form>
 					) : (
 						'Loading...'
 					)}

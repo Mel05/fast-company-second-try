@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react'
-import api from '../../api'
 import * as yup from 'yup'
 import TextField from '../common/form/textField'
 import SelectField from '../common/form/selectField'
 import RadioField from '../common/form/radioField'
 import MultiSelectField from '../common/form/multiSelectField'
 import CheckBoxField from '../common/form/checkBoxField'
+import { useProfessions } from '../../hooks/useProfessions'
+import { useQualities } from '../../hooks/useQualities'
+import { useAuth } from '../../hooks/useAuth'
+import { useNavigate } from 'react-router-dom'
 
 const RegisterForm = () => {
+	const navigate = useNavigate()
 	const [data, setData] = useState({
+		name: '',
 		email: '',
 		password: '',
 		profession: '',
@@ -16,14 +21,16 @@ const RegisterForm = () => {
 		qualities: [],
 		licence: false,
 	})
-	const [professions, setProfessions] = useState()
-	const [qualities, setQualities] = useState({})
-	const [errors, setErrors] = useState({})
+	const { signUp } = useAuth()
+	const { professions } = useProfessions()
+	const { qualities } = useQualities()
+	const professionsList = professions.map(p => ({
+		label: p.name,
+		value: p._id,
+	}))
+	const qualitiesList = qualities.map(q => ({ label: q.name, value: q._id }))
 
-	useEffect(() => {
-		api.professions.fetchAll().then(data => setProfessions(data))
-		api.qualities.fetchAll().then(data => setQualities(data))
-	}, [])
+	const [errors, setErrors] = useState({})
 
 	const validateScheme = yup.object().shape({
 		licence: yup
@@ -33,6 +40,11 @@ const RegisterForm = () => {
 			),
 
 		profession: yup.string().required('Обязательно выберите вашу проффесию'),
+
+		name: yup
+			.string()
+			.required('Имя обязательно для заполнения')
+			.matches(/(?=.{3,})/, 'Имя должно состоять минимум из 3 символов'),
 
 		password: yup
 			.string()
@@ -66,43 +78,6 @@ const RegisterForm = () => {
 	}
 	const isValid = Object.keys(errors).length === 0
 
-	// const validatorConfig = {
-	// 	email: {
-	// 		isRequired: {
-	// 			message: 'Электронная почта обязательна для заполнения',
-	// 		},
-	// 		isEmail: {
-	// 			message: 'Email введен не коректно',
-	// 		},
-	// 	},
-	// 	password: {
-	// 		isRequired: {
-	// 			message: 'Пароль обязателен для заполнения',
-	// 		},
-	// 		isCapitalSymbol: {
-	// 			message: 'Пароль должен содержать хотябы одну заглавную букву',
-	// 		},
-	// 		isContainDigit: {
-	// 			message: 'Пароль должен содержать хотябы одно число',
-	// 		},
-	// 		min: {
-	// 			message: 'Пароль должен состоять минимум из 8 символов',
-	// 			value: 8,
-	// 		},
-	// 	},
-	// 	profession: {
-	// 		isRequired: {
-	// 			message: 'Обязательно выберите вашу проффесию',
-	// 		},
-	// 	},
-	// 	licence: {
-	// 		isRequired: {
-	// 			message:
-	// 				'Вы не можете использовать наш сервис без подтверждения лицензионного соглашения',
-	// 		},
-	// 	},
-	// }
-
 	const handleChange = target => {
 		setData(prevState => ({
 			...prevState,
@@ -110,11 +85,18 @@ const RegisterForm = () => {
 		}))
 	}
 
-	const handleSubmit = e => {
+	const handleSubmit = async e => {
 		e.preventDefault()
 		const isValid = validate()
 		if (!isValid) return
-		console.log(data)
+		const newData = { ...data, qualities: data.qualities.map(q => q.value) }
+
+		try {
+			await signUp(newData)
+			navigate('/')
+		} catch (error) {
+			setErrors(error)
+		}
 	}
 
 	return (
@@ -135,12 +117,20 @@ const RegisterForm = () => {
 				handleChange={handleChange}
 			/>
 
+			<TextField
+				label='Имя'
+				name='name'
+				value={data.name}
+				error={errors.name}
+				handleChange={handleChange}
+			/>
+
 			<SelectField
 				label='Выберите свою профессию'
 				defaultOptions='Выберите...'
 				name='profession'
 				value={data.profession}
-				options={professions}
+				options={professionsList}
 				error={errors.profession}
 				handleChange={handleChange}
 			/>
@@ -159,7 +149,7 @@ const RegisterForm = () => {
 				label='Выберите ваши качества'
 				name='qualities'
 				defaultValue={data.qualities}
-				options={qualities}
+				options={qualitiesList}
 				handleChange={handleChange}
 			/>
 			<CheckBoxField

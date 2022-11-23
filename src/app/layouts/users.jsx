@@ -1,24 +1,33 @@
 import React from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Navigate } from 'react-router-dom'
 import EditUserPage from '../components/page/editUserPage'
 import UserPage from '../components/page/userPage'
 import UsersListPage from '../components/page/usersListPage'
+import { useAuth } from '../hooks/useAuth'
+import UsersProvider from '../hooks/useUsers'
 
 const Users = () => {
 	const params = useParams()
 	const { userId, edit } = params
+	const { currentUser } = useAuth()
 
 	return (
 		<>
-			{userId ? (
-				edit ? (
-					<EditUserPage />
+			<UsersProvider>
+				{userId ? (
+					edit ? (
+						userId === currentUser._id ? (
+							<EditUserPage />
+						) : (
+							<Navigate to={`/users/${currentUser._id}/edit`} />
+						)
+					) : (
+						<UserPage userId={userId} />
+					)
 				) : (
-					<UserPage userId={userId} />
-				)
-			) : (
-				<UsersListPage />
-			)}
+					<UsersListPage />
+				)}
+			</UsersProvider>
 		</>
 	)
 }
