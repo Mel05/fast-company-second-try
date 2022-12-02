@@ -1,12 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Navigate } from 'react-router-dom'
-import { useAuth } from '../../hooks/useAuth'
+import { useSelector } from 'react-redux'
+import { getIsLoggedIn } from '../../store/users'
 
 const ProtectedRoute = ({ children }) => {
-	const { currentUser } = useAuth()
+	const isLoggedIn = useSelector(getIsLoggedIn())
 
-	if (!currentUser) {
+	if (!isLoggedIn) {
 		return <Navigate to='/login' />
 	}
 	return children

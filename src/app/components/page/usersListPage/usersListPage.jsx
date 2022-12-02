@@ -3,19 +3,23 @@ import PropTypes from 'prop-types'
 import _ from 'lodash'
 import { paginate } from '../../../utils/paginate'
 
-import { useAuth } from '../../../hooks/useAuth'
-import { useUsers } from '../../../hooks/useUsers'
-import { useProfessions } from '../../../hooks/useProfessions'
-
 import SearchStatus from '../../ui/searchStatus'
 import GroupList from '../../common/groupList'
 import Pagination from '../../common/pagination'
 import UsersTable from '../../ui/usersTable'
 
+import { useSelector } from 'react-redux'
+import { getCurrentUserId, getUsersList } from '../../../store/users'
+import {
+	getProfessions,
+	getProfessionsLoadingStatus,
+} from '../../../store/professions'
+
 const UsersListPage = () => {
-	const { users } = useUsers()
-	const { currentUser } = useAuth()
-	const { professions, isLoading: professionsLoading } = useProfessions()
+	const users = useSelector(getUsersList())
+	const currentUserId = useSelector(getCurrentUserId())
+	const professions = useSelector(getProfessions())
+	const profLoading = useSelector(getProfessionsLoadingStatus())
 
 	const [searchQuery, setSearchQuery] = useState('')
 	const [selectedProf, setSelectedProf] = useState()
@@ -81,7 +85,7 @@ const UsersListPage = () => {
 						JSON.stringify(user.profession) === JSON.stringify(selectedProf)
 			  )
 			: users
-		return filteredUsers.filter(u => u._id !== currentUser._id)
+		return filteredUsers.filter(u => u._id !== currentUserId)
 	}
 
 	const filteredUsers = filterUsers(users)
@@ -99,7 +103,7 @@ const UsersListPage = () => {
 
 	return (
 		<div className='d-flex'>
-			{professions && !professionsLoading && (
+			{professions && !profLoading && (
 				<div className='d-flex flex-column flex-shrink-0 p-3'>
 					<GroupList
 						professions={professions}

@@ -6,32 +6,46 @@ import SelectField from '../../common/form/selectField'
 import RadioField from '../../common/form/radioField'
 import MultiSelectField from '../../common/form/multiSelectField'
 import BackButton from '../../common/backButton'
-import { useQualities } from '../../../hooks/useQualities'
-import { useProfessions } from '../../../hooks/useProfessions'
-import { useAuth } from '../../../hooks/useAuth'
+import { useDispatch, useSelector } from 'react-redux'
+import {
+	getQualities,
+	getQualitiesLoadingStatus,
+} from '../../../store/qualities'
+import {
+	getProfessions,
+	getProfessionsLoadingStatus,
+} from '../../../store/professions'
+import { getCurrentUserData, updateUser } from '../../../store/users'
 
 const EditUserPage = () => {
 	const navigate = useNavigate()
 	const [isLoading, setIsLoading] = useState(true)
 	const [data, setData] = useState()
-	const { currentUser, updateUserData } = useAuth()
+	const currentUser = useSelector(getCurrentUserData())
+	const dispatch = useDispatch()
 	const [errors, setErrors] = useState({})
-	const { professions, isLoading: profLoading } = useProfessions()
-	const { qualities, isLoading: qualLoading } = useQualities()
+
+	const professions = useSelector(getProfessions())
+	const profLoading = useSelector(getProfessionsLoadingStatus())
+	const qualities = useSelector(getQualities())
+	const qualLoading = useSelector(getQualitiesLoadingStatus())
+
 	const professionsList = professions.map(p => ({
 		label: p.name,
 		value: p._id,
 	}))
 	const qualitiesList = qualities.map(q => ({ label: q.name, value: q._id }))
 
-	const handleSubmit = async e => {
+	const handleSubmit = e => {
 		e.preventDefault()
 		const isValid = validate()
 		if (!isValid) return
-		await updateUserData({
-			...data,
-			qualities: data.qualities.map(q => q.value),
-		})
+		dispatch(
+			updateUser({
+				...data,
+				qualities: data.qualities.map(q => q.value),
+			})
+		)
 		navigate(`/users/${currentUser._id}`)
 	}
 

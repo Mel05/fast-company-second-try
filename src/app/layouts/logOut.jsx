@@ -1,10 +1,14 @@
 import React, { useEffect } from 'react'
-import { useAuth } from '../hooks/useAuth'
+import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import { logOut } from '../store/users'
 
 const LogOut = () => {
-	const { logOut } = useAuth()
+	const navigate = useNavigate()
+	const dispatch = useDispatch()
 	useEffect(() => {
-		logOut()
+		dispatch(logOut())
+		navigate('/')
 	}, [])
 
 	return <h1> Loading ... </h1>

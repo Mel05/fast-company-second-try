@@ -2,12 +2,13 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { useLocation, useNavigate } from 'react-router-dom'
 import BackButton from '../common/backButton'
-import { useAuth } from '../../hooks/useAuth'
+import { useSelector } from 'react-redux'
+import { getCurrentUserData } from '../../store/users'
 
 const UserCard = ({ user }) => {
 	const navigate = useNavigate()
 	const location = useLocation()
-	const { currentUser } = useAuth()
+	const currentUser = useSelector(getCurrentUserData())
 
 	const handleClick = () => {
 		navigate(location.pathname + '/edit')

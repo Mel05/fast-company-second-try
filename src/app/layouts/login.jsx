@@ -19,7 +19,7 @@ const Login = () => {
 							<h3 className='mb-4'> Register </h3>
 							<RegisterForm />
 							<p>
-								Already have account?{' '}
+								Already have account?
 								<a role='button' onClick={toggleFormType}>
 									Sign In
 								</a>
